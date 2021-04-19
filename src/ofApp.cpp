@@ -98,9 +98,9 @@ void ofApp::keyPressed(int key){
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
-    if (key ==  OF_KEY_UP) {
+    if (key ==  'w') {
         shipYVelocity -= 5.0;
-    } else if (key == OF_KEY_DOWN) {
+    } else if (key == 's') {
         shipYVelocity += 5.0;
     }
 }
