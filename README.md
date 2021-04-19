@@ -1,0 +1,1 @@
+* This should be checked out to the apps/myApps subdirectory of the of_v0.11.2_osx_release directory. Probably this works on other platforms as well (though only tested/run on MacOS and emscripten sdk-1.40.0-64bit - see https://openframeworks.cc/download/ for download info). 
