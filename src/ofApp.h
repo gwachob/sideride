@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "bullets.h"
 #include <random>
 
 class ofApp : public ofBaseApp{
@@ -30,7 +31,11 @@ private:
     int positionY = 383;
     int shipY = 100;
     double shipYVelocity = 0;
+    const int maxBullets = 10;
     std::default_random_engine generator;
     std::normal_distribution<double> directionalDistribution;
     std::normal_distribution<double> eitherDistribution;
+    std::list<Bullet> bullets = std::list<Bullet>();
+    
+    void shootBullet();
 };

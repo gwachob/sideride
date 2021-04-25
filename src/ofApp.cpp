@@ -1,4 +1,5 @@
 #include "ofApp.h"
+#include "bullets.h"
 #include <algorithm>
 
 
@@ -44,31 +45,9 @@ void ofApp::update(){
     } else if (bias < -1.5) {
         bias = -1.5;
     }
-   /* cerr << "bias is " << bias << "\n";
-    if ((bias > -0.1) || (bias < 0.1)) {
-        // flat ground is boring, lets artificially make it interesting
-        bias = 0.1;
-    }
-    */
+    
     mountainsRing[mountainPosition] = clamp(mountainsRing[getWrapped(1024, mountainPosition, -1)] + int( directionalDistribution(generator) * bias + eitherDistribution(generator)), 0, 767);
     
-    /*
-    int twoprev = getWrapped(1024, mountainPosition, - 2);
-    int oneprev = getWrapped(1024, mountainPosition,  - 1);
-    
-    bool twoRising = ((mountainsRing[twoprev] < mountainsRing[oneprev]) &&
-                      (mountainsRing[oneprev] < mountainsRing[mountainPosition]));
-    bool twoFalling = ((mountainsRing[twoprev] > mountainsRing[oneprev]) &&
-                      (mountainsRing[oneprev] > mountainsRing[mountainPosition]));
-    
-    if (twoRising) { // bias towards rising
-        mountainsRing[mountainPosition] = clamp(mountainsRing[oneprev] + int( directionalDistribution(generator)), 0, 767);
-    }
-    else if (twoFalling) { // bias towards falling
-        mountainsRing[mountainPosition] = clamp(mountainsRing[oneprev] - int( directionalDistribution(generator)), 0, 767);
-    } else {
-        mountainsRing[mountainPosition] = clamp(mountainsRing[oneprev] + int( eitherDistribution(generator)), 0, 767);
-    }*/
     worldPosition += 1;
     mountainPosition = worldPosition % 1024;
     shipY = clamp(int(shipY + shipYVelocity), 0, 767);
@@ -76,6 +55,16 @@ void ofApp::update(){
     if ((shipYVelocity < 0.1) && (shipYVelocity > -0.1)) {
         shipYVelocity = 0;
     }
+    
+    for (auto& bullet: bullets) {
+        bullet.positionX += bullet.velocityX;
+        bullet.positionY += bullet.velocityY;
+    }
+    
+    bullets.remove_if([](Bullet bullet){
+        return (bullet.positionX > 1023 || bullet.positionY > 767 || bullet.positionX < 0 || bullet.positionY < 0);
+        
+    });
 }
 
 //--------------------------------------------------------------
@@ -86,14 +75,28 @@ void ofApp::draw(){
         //ofDrawRectangle(x,767-mountainsRing[getWrapped(1024, mountainPosition,x)], 1, 1);
         ofDrawRectangle(x,767-mountainsRing[getWrapped(1024, mountainPosition,x)], 1, mountainsRing[getWrapped(1024, mountainPosition,x)]);
     }
-    ofSetColor(ofColor::royalBlue);
     
+    ofSetColor(ofColor::orangeRed);
+    for (const auto& bullet: bullets) {
+        ofDrawRectangle(bullet.positionX, bullet.positionY, 3, 3);
+    }
+    
+    ofSetColor(ofColor::royalBlue);
     ofDrawSphere(300, shipY, 10);
+    
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
 
+}
+
+void ofApp::shootBullet() {
+    bullets.emplace_back(300 /* shipX */, shipY, 2.0, shipYVelocity);
+    if (bullets.size() > maxBullets) {
+        bullets.pop_front();
+    }
 }
 
 //--------------------------------------------------------------
@@ -102,6 +105,8 @@ void ofApp::keyReleased(int key){
         shipYVelocity -= 5.0;
     } else if (key == 's') {
         shipYVelocity += 5.0;
+    } else if (key == ' ') {
+        shootBullet();
     }
 }
 
